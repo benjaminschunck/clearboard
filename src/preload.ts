@@ -1,3 +1,5 @@
+import {ipcRenderer} from "electron";
+
 window.addEventListener("DOMContentLoaded", () => {
     const button = document.createElement("button");
     button.textContent = "⚙";
@@ -9,7 +11,7 @@ window.addEventListener("DOMContentLoaded", () => {
     button.style.zIndex = "9999";   // eine große Zahl, als String
 
     button.addEventListener("click", () => {
-        console.log("klick");
+        ipcRenderer.send("open-settings");
     });
 
     document.body.appendChild(button);   // Kind an ein Element hängen

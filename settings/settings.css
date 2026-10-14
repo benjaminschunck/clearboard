@@ -1,0 +1,147 @@
+/* Farben und Abstände im Stil von chess.com, an einer Stelle gesammelt */
+:root {
+    --bg: #231a2e;               /* wird per Script auf deine gewählte Farbe gesetzt */
+    --panel: rgba(0, 0, 0, 0.25);
+    --panel-hover: rgba(0, 0, 0, 0.35);
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.6);
+    --accent: #81b64c;           /* das chess.com-Grün */
+    --accent-shadow: #45753c;
+    --radius: 8px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 24px 20px;
+    min-height: 100vh;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    /* gleiche Übergangszeit wie chess.com, damit beide Fenster gleichzeitig umfärben */
+    transition: background-color 0.3s;
+    user-select: none;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.logo {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    background: var(--accent);
+    box-shadow: 0 3px 0 var(--accent-shadow);
+    font-size: 20px;
+}
+
+h1 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+h2 {
+    margin: 0 0 8px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+/* Eine Einstellungszeile: Text links, Steuerelement rechts */
+.setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 16px;
+}
+
+.setting + .setting {
+    border-top: 1px solid var(--border);
+}
+
+.setting:hover {
+    background: var(--panel-hover);
+}
+
+.setting-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.setting-title {
+    font-weight: 600;
+}
+
+.setting-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.color-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-value {
+    font-family: Consolas, monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* Den Standard-Farbwähler des Browsers in ein rundes Farbfeld verwandeln */
+input[type="color"] {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    /* heller Ring, weil das Farbfeld sonst mit dem gleichfarbigen Hintergrund verschmilzt */
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    background: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: 50%;
+}
+
+input[type="color"]:hover {
+    border-color: var(--accent);
+}
+
+footer {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}

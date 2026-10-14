@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clearboard Settings</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <header>
+        <div class="logo">♞</div>
+        <h1>Clearboard</h1>
+    </header>
+
+    <h2>Erscheinungsbild</h2>
+    <div class="card">
+        <label class="setting" for="background-color">
+            <span class="setting-text">
+                <span class="setting-title">Hintergrundfarbe</span>
+                <span class="setting-hint">Hinter Brett und Menüs</span>
+            </span>
+            <span class="color-control">
+                <span class="color-value" id="background-color-value">#231a2e</span>
+                <input type="color" id="background-color" value="#231a2e">
+            </span>
+        </label>
+    </div>
+
+    <footer>Änderungen werden automatisch gespeichert</footer>
+
+    <script>
+        const picker = document.getElementById("background-color");
+        const valueLabel = document.getElementById("background-color-value");
+
+        // Farbe überall im Settings-Fenster anzeigen: Hintergrund und Text neben dem Farbfeld
+        const showColor = (color) => {
+            document.documentElement.style.setProperty("--bg", color);
+            valueLabel.textContent = color;
+        };
+
+        // Beim Öffnen den gespeicherten Wert anzeigen statt immer den Standardwert
+        window.clearboard.getSettings().then((settings) => {
+            if (settings.backgroundColor) {
+                picker.value = settings.backgroundColor;
+            }
+            showColor(picker.value);
+        });
+
+        // "input" feuert bei jeder Bewegung: nur Live-Vorschau
+        picker.addEventListener("input", () => {
+            showColor(picker.value);
+            window.clearboard.setBackground(picker.value);
+        });
+
+        // "change" feuert erst beim Loslassen/Schließen: jetzt speichern
+        picker.addEventListener("change", () => {
+            window.clearboard.saveSettings();
+        });
+    </script>
+</body>
+</html>
