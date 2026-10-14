@@ -14,14 +14,96 @@
 
     <h2>Erscheinungsbild</h2>
     <div class="card">
-        <label class="setting" for="background-color">
+        <label class="setting">
             <span class="setting-text">
                 <span class="setting-title">Hintergrundfarbe</span>
                 <span class="setting-hint">Hinter Brett und Menüs</span>
             </span>
             <span class="color-control">
-                <span class="color-value" id="background-color-value">#231a2e</span>
-                <input type="color" id="background-color" value="#231a2e">
+                <span class="color-value"></span>
+                <input type="color" data-setting="backgroundColor" value="#231a2e">
+            </span>
+        </label>
+        <label class="setting">
+            <span class="setting-text">
+                <span class="setting-title">Akzentfarbe</span>
+                <span class="setting-hint">Buttons, Logo und Highlights</span>
+            </span>
+            <span class="color-control">
+                <span class="color-value"></span>
+                <input type="color" data-setting="accentColor" value="#81b64c">
+            </span>
+        </label>
+    </div>
+
+    <h2>Hintergrundbild</h2>
+    <div class="card">
+        <div class="image-preview" id="image-preview">
+            <span class="image-preview-empty">Kein Bild gewählt</span>
+        </div>
+        <div class="setting">
+            <span class="setting-text">
+                <span class="setting-title">Bild</span>
+                <span class="setting-hint">PNG, JPG, WebP oder GIF</span>
+            </span>
+            <span class="button-row">
+                <button type="button" class="button" id="remove-image">Entfernen</button>
+                <button type="button" class="button button-primary" id="choose-image">Wählen…</button>
+            </span>
+        </div>
+        <label class="setting">
+            <span class="setting-text">
+                <span class="setting-title">Weichzeichnen</span>
+                <span class="setting-hint">Wie stark das Bild verschwimmt</span>
+            </span>
+            <span class="range-control">
+                <span class="range-value"></span>
+                <input type="range" data-setting="backgroundBlur" data-unit="px" min="0" max="40" step="1" value="12">
+            </span>
+        </label>
+        <label class="setting">
+            <span class="setting-text">
+                <span class="setting-title">Abdunkeln</span>
+                <span class="setting-hint">Damit weißer Text auf hellen Bildern lesbar bleibt</span>
+            </span>
+            <span class="range-control">
+                <span class="range-value"></span>
+                <input type="range" data-setting="backgroundDim" data-unit="%" min="0" max="90" step="1" value="20">
+            </span>
+        </label>
+        <label class="setting">
+            <span class="setting-text">
+                <span class="setting-title">Panel-Deckkraft</span>
+                <span class="setting-hint">Weniger = mehr Bild scheint durch</span>
+            </span>
+            <span class="range-control">
+                <span class="range-value"></span>
+                <input type="range" data-setting="panelOpacity" data-unit="%" min="20" max="100" step="1" value="100">
+            </span>
+        </label>
+    </div>
+
+    <h2>Brett</h2>
+    <div class="card">
+        <div class="board-preview" aria-hidden="true"></div>
+        <label class="setting">
+            <span class="setting-text">
+                <span class="setting-title">Helle Felder</span>
+                <span class="setting-hint">z.B. a8, c8, e8 …</span>
+            </span>
+            <span class="color-control">
+                <span class="color-value"></span>
+                <input type="color" data-setting="boardLight" value="#ebecd0">
+            </span>
+        </label>
+        <label class="setting">
+            <span class="setting-text">
+                <span class="setting-title">Dunkle Felder</span>
+                <span class="setting-hint">z.B. b8, d8, f8 …</span>
+            </span>
+            <span class="color-control">
+                <span class="color-value"></span>
+                <input type="color" data-setting="boardDark" value="#739552">
             </span>
         </label>
     </div>
@@ -29,32 +111,70 @@
     <footer>Änderungen werden automatisch gespeichert</footer>
 
     <script>
-        const picker = document.getElementById("background-color");
-        const valueLabel = document.getElementById("background-color-value");
+        // Alle Eingaben mit einem data-setting-Attribut werden gleich behandelt (Farbwähler und Regler).
+        // Für eine neue Einstellung reicht also eine neue Zeile im HTML (plus der Eintrag in main.ts).
+        const inputs = document.querySelectorAll("input[data-setting]");
 
-        // Farbe überall im Settings-Fenster anzeigen: Hintergrund und Text neben dem Farbfeld
-        const showColor = (color) => {
-            document.documentElement.style.setProperty("--bg", color);
-            valueLabel.textContent = color;
+        // Regler liefern Text ("12"), main.ts erwartet aber eine Zahl
+        const valueOf = (input) => (input.type === "range" ? Number(input.value) : input.value);
+
+        // Wert anzeigen: Text neben dem Eingabefeld, und als CSS-Variable für die Seite selbst
+        // (--backgroundColor färbt den Fensterhintergrund, --boardLight/--boardDark die Brett-Vorschau,
+        //  --backgroundBlur, --backgroundDim und --panelOpacity steuern Bild und Karten hier im Fenster)
+        const show = (input) => {
+            const label = input.parentElement.querySelector(".color-value, .range-value");
+            label.textContent = input.value + (input.dataset.unit ?? "");
+            document.documentElement.style.setProperty("--" + input.dataset.setting, input.value);
         };
 
-        // Beim Öffnen den gespeicherten Wert anzeigen statt immer den Standardwert
-        window.clearboard.getSettings().then((settings) => {
-            if (settings.backgroundColor) {
-                picker.value = settings.backgroundColor;
+        // Hintergrundbild im Settings-Fenster und in der Vorschau anzeigen
+        const preview = document.getElementById("image-preview");
+        const removeButton = document.getElementById("remove-image");
+        const showImage = (url) => {
+            const css = url ? 'url("' + url + '")' : "none";
+            document.documentElement.style.setProperty("--backgroundImage", css);
+            preview.classList.toggle("has-image", Boolean(url));
+            removeButton.disabled = !url;
+            // Weichzeichnen und Deckkraft wirken nur mit Bild, also ohne Bild ausgrauen
+            for (const input of document.querySelectorAll("input[type=range]")) {
+                input.disabled = !url;
             }
-            showColor(picker.value);
-        });
+        };
 
-        // "input" feuert bei jeder Bewegung: nur Live-Vorschau
-        picker.addEventListener("input", () => {
-            showColor(picker.value);
-            window.clearboard.setBackground(picker.value);
-        });
+        // Alle Werte auf einmal übernehmen (beim Öffnen und nach Bild-Änderungen)
+        const showAll = (settings) => {
+            for (const input of inputs) {
+                const saved = settings[input.dataset.setting];
+                if (saved !== null && saved !== undefined) {
+                    input.value = saved;
+                }
+                show(input);
+            }
+            showImage(settings.backgroundImageUrl);
+        };
 
-        // "change" feuert erst beim Loslassen/Schließen: jetzt speichern
-        picker.addEventListener("change", () => {
-            window.clearboard.saveSettings();
+        // Beim Öffnen die gespeicherten Werte anzeigen statt immer die Standardwerte
+        window.clearboard.getSettings().then(showAll);
+
+        for (const input of inputs) {
+            // "input" feuert bei jeder Bewegung: nur Live-Vorschau
+            input.addEventListener("input", () => {
+                show(input);
+                window.clearboard.setSetting(input.dataset.setting, valueOf(input));
+            });
+
+            // "change" feuert erst beim Loslassen/Schließen: jetzt speichern
+            input.addEventListener("change", () => {
+                window.clearboard.saveSettings();
+            });
+        }
+
+        // Bild wählen/entfernen läuft komplett in main.ts, wir bekommen nur die neuen Einstellungen zurück
+        document.getElementById("choose-image").addEventListener("click", async () => {
+            showAll(await window.clearboard.chooseBackgroundImage());
+        });
+        removeButton.addEventListener("click", async () => {
+            showAll(await window.clearboard.removeBackgroundImage());
         });
     </script>
 </body>

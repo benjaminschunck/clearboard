@@ -3,6 +3,9 @@ import {ipcRenderer} from "electron";
 window.addEventListener("DOMContentLoaded", () => {
     const button = document.createElement("button");
     button.textContent = "⚙";
+    // Über die ID stylt clearboard.css den Button (Farbe, Form, Hover)
+    button.id = "clearboard-settings-button";
+    button.title = "Clearboard-Einstellungen";
 
     // Position: fest, unten rechts, über allem
     button.style.position = "fixed";

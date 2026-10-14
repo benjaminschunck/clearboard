@@ -1,3 +1,88 @@
-body{
+/* Standardfarbe, solange in den Settings nichts gewählt ist */
+body {
     --theme-background-color: #231a2e;
+}
+
+/*
+ * chess.com färbt seine Oberfläche über "--color-…"-Variablen (im Dark Mode an html.dark-mode).
+ * Die meisten davon sind halbtransparentes Weiß/Schwarz und passen sich deiner Farbe
+ * automatisch an. Nur die deckenden ("opaque") Flächen hängen fest an chess.coms Grautönen,
+ * genau die bleiben sonst im Standard-Dark. Die leiten wir hier aus deiner Farbe ab.
+ *
+ * Wichtig: Die Regel muss am body stehen, nicht am html. var() wird an dem Element
+ * ausgewertet, wo die Variable definiert ist, und deine Farbe wird am body gesetzt.
+ * "html.dark-mode body" ist außerdem spezifischer als chess.coms ".dark-mode".
+ */
+html.dark-mode body {
+    /* Drei Abstufungen deiner Farbe */
+    --cb-bg: var(--theme-background-color);
+    --cb-bg-dark: color-mix(in srgb, var(--cb-bg) 80%, black);
+    --cb-bg-light: color-mix(in srgb, var(--cb-bg) 88%, white);
+
+    /* Dieselben Farben, aber durchscheinend: --cb-alpha kommt aus dem Regler "Panel-Deckkraft".
+       color-mix mit "transparent" macht eine Farbe teilweise durchsichtig. */
+    --cb-panel: color-mix(in srgb, var(--cb-bg) var(--cb-alpha, 100%), transparent);
+    --cb-panel-dark: color-mix(in srgb, var(--cb-bg-dark) var(--cb-alpha, 100%), transparent);
+    --cb-panel-light: color-mix(in srgb, var(--cb-bg-light) var(--cb-alpha, 100%), transparent);
+
+    /* Grundflächen (bei chess.com: gray-800) */
+    --color-bg-primary: var(--cb-panel);
+    --color-bg-surface: var(--cb-panel);
+    --color-bg-opaque-lighter: var(--cb-panel);
+    --globalSiteBackground: var(--cb-panel);
+
+    /* Dunklere Flächen wie Sidebar, Menüs, Overlays (bei chess.com: gray-900) */
+    --color-bg-opaque: var(--cb-panel-dark);
+    --globalOverlayBackground: var(--cb-panel-dark);
+    --color-bg-panel: color-mix(in srgb, var(--cb-bg-dark) calc(var(--cb-alpha, 100%) * 0.75), transparent);
+    --color-bg-overlay-board: color-mix(in srgb, var(--cb-bg) 65%, transparent);
+    --color-bg-gradient-modal: linear-gradient(180deg, var(--cb-panel) 0%, var(--cb-panel-dark) 100%);
+
+    /* Hellere Flächen wie Toasts (bei chess.com: gray-700). Rahmen bleiben deckend. */
+    --color-bg-toaster: var(--cb-panel-light);
+    --color-border-opaque: var(--cb-bg-light);
+    --color-bg-membership-gold: var(--cb-panel-light);
+}
+
+/*
+ * chess.coms grüne Hauptbuttons ("Start Game", "Solve Daily Puzzle"): durchscheinend in der Akzentfarbe,
+ * passend zu den anderen Buttons. Hier ausnahmsweise !important: chess.com setzt die Button-Farben mit
+ * eigenen Regeln für normal, :hover und :active, und !important gewinnt gegen alle davon,
+ * egal wie spezifisch sie sind.
+ */
+html body .cc-button-primary {
+    background: color-mix(in srgb, var(--cb-accent, #81b64c) 70%, transparent) !important;
+    box-shadow: 0 4px 0 color-mix(in srgb, color-mix(in srgb, var(--cb-accent, #81b64c) 55%, black) 70%, transparent) !important;
+}
+
+html body .cc-button-primary:hover {
+    background: color-mix(in srgb, var(--cb-accent, #81b64c) 85%, transparent) !important;
+}
+
+/* Der ⚙-Button von Clearboard (wird vom preload.ts eingefügt, Position steht dort) */
+#clearboard-settings-button {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    /* --cb-accent kommt aus den Settings (Akzentfarbe), der Schatten ist eine dunklere Mischung davon */
+    background: var(--cb-accent, #81b64c);
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--cb-accent, #81b64c) 55%, black), 0 6px 12px rgba(0, 0, 0, 0.35);
+    color: #ffffff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.85;
+    transition: transform 0.15s, opacity 0.15s;
+}
+
+#clearboard-settings-button:hover {
+    opacity: 1;
+    transform: rotate(45deg);        /* kleines Zahnrad-Drehen beim Drüberfahren */
+}
+
+/* Beim Klicken "eindrücken", wie die Buttons auf chess.com */
+#clearboard-settings-button:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--cb-accent, #81b64c) 55%, black);
 }
